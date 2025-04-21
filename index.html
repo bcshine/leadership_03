@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4가지 리더십 유형 자가진단 통합</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f9;
+      color: #2c3e50;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 40px 20px;
+    }
+    h1, h2, h3 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .question-box, .type-box, .leader-box {
+      background: #fff;
+      margin: 20px 0;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .question-box strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    .scale {
+      margin: 20px 0;
+    }
+    .scale label {
+      margin-right: 15px;
+      display: inline-block;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .scale input[type="radio"] {
+      margin-right: 5px;
+      cursor: pointer;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    button:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+    .result {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 30px;
+      text-align: center;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .hidden {
+      display: none;
+    }
+    .detail-container {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .progress {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #666;
+    }
+    .leadership-comparison {
+      margin-top: 40px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .comparison-table th, .comparison-table td {
+      padding: 12px;
+      border: 1px solid #e0e0e0;
+      text-align: left;
+    }
+    .comparison-table th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+    .highlighted-row {
+      background-color: #e3f2fd !important;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>4가지 리더십 유형 자가진단</h1>
+    <div id="progress" class="progress"></div>
+    <div id="quiz">
+      <div id="questionContainer" class="question-box"></div>
+      <button id="nextButton">다음 질문</button>
+    </div>
+    <div class="result hidden" id="resultBox"></div>
+    <div id="detailContainer" class="detail-container hidden"></div>
+    <div id="comparisonContainer" class="leadership-comparison hidden"></div>
+  </div>
+
+  <script>
+    const questions = [
+      { text: "1. 직원이 힘들어 보이면 일보다 감정부터 살핀다.", type: "엄마형" },
+      { text: "2. 팀원이 스스로 생각하고 성장하도록 기다린다.", type: "코치형" },
+      { text: "3. 작업 품질이나 서비스의 완성도가 항상 중요하다.", type: "장인형" },
+      { text: "4. 문제 상황에서는 신속하게 방향을 지시한다.", type: "지휘관형" },
+      { text: "5. 감정적으로 힘들어하는 직원에게 위로와 공감을 자주 표현한다.", type: "엄마형" },
+      { text: "6. 질문을 통해 직원 스스로 답을 찾게 한다.", type: "코치형" },
+      { text: "7. 일의 기준과 원칙이 지켜졌는지를 중요하게 본다.", type: "장인형" },
+      { text: "8. 결정은 빠르게 내리고 책임은 내가 진다.", type: "지휘관형" },
+      { text: "9. 직원과 정서적으로 친밀한 관계를 유지하는 편이다.", type: "엄마형" },
+      { text: "10. 팀원과 자주 대화하며 의견을 수렴하려 한다.", type: "코치형" },
+      { text: "11. 매뉴얼이나 체크리스트를 철저히 활용한다.", type: "장인형" },
+      { text: "12. 위기 상황에서는 빠르게 판단하고 강하게 이끈다.", type: "지휘관형" }
+    ];
+
+    const leadershipDetails = {
+      "엄마형": {
+        description: "감정적 지지와 위로를 중시하며, 팀원들과 정서적으로 친밀한 관계를 맺는 리더십입니다.",
+        strengths: ["높은 팀 응집력", "정서적 안정감 제공", "세심한 배려"],
+        weaknesses: ["업무 효율성 저하 가능성", "객관적 판단 어려움", "경계선 설정 미흡"],
+        recommendation: "감정 중심에서 성과 중심으로 균형을 잡아가는 것이 필요합니다."
+      },
+      "코치형": {
+        description: "질문과 경청을 통해 직원 스스로 성장하도록 돕는 리더십입니다.",
+        strengths: ["자율성 증진", "창의적 문제 해결", "장기적 성장 지원"],
+        weaknesses: ["즉각적 결과 부족", "시간 소모 많음", "불확실성 감수"],
+        recommendation: "상황에 따라 더 적극적인 개입이 필요할 수 있습니다."
+      },
+      "장인형": {
+        description: "완벽과 품질에 집중하며, 높은 기준과 원칙을 중시하는 리더십입니다.",
+        strengths: ["고품질 결과물", "철저한 업무 수행", "전문성 확보"],
+        weaknesses: ["유연성 부족", "과도한 디테일 집착", "변화 적응 어려움"],
+        recommendation: "때로는 완벽보다 진전이 중요할 수 있음을 인식해야 합니다."
+      },
+      "지휘관형": {
+        description: "신속한 의사결정과 강한 추진력으로 팀을 이끄는 리더십입니다.",
+        strengths: ["빠른 결정력", "위기 대처 능력", "명확한 방향 제시"],
+        weaknesses: ["직원 의견 소홀", "경직된 접근", "과도한 통제"],
+        recommendation: "직원들의 의견을 경청하고 자율성을 부여하는 것이 중요합니다."
+      }
+    };
+
+    const comparisonData = {
+      "엄마형": {
+        "소통방식": "감정적 교감을 먼저 시도, 위로와 격려 중심",
+        "갈등해결": "정서적 상처를 우선 치유, 화해를 중시",
+        "의사결정": "팀원들의 감정 상태를 고려하여 결정을 미룸",
+        "동기부여": "따뜻한 칭찬과 정서적 지지로 동기부여",
+        "육아특징": "자녀의 감정에 민감하고 보살핌이 강함",
+        "집안일분담": "가족의 편안함을 우선시해 자신이 더 많이 담당",
+        "가족소통": "가족 구성원의 감정을 자주 확인하고 대화",
+        "휴식여가": "가족과 함께하는 시간을 중요시함"
+      },
+      "코치형": {
+        "소통방식": "질문을 통해 상대방이 스스로 생각하도록 유도",
+        "갈등해결": "서로의 입장을 충분히 경청하고 의견 수렴",
+        "의사결정": "다양한 의견을 듣고 합의점을 찾으려 노력",
+        "동기부여": "성장 가능성을 보여주고 자기 효능감 강화",
+        "육아특징": "자녀 스스로 문제를 해결하도록 기다려줌",
+        "집안일분담": "가족 구성원과 역할을 조율하며 분담",
+        "가족소통": "가족 회의를 자주 하고 의견을 존중",
+        "휴식여가": "가족 구성원의 의견을 반영한 여가 계획"
+      },
+      "장인형": {
+        "소통방식": "업무 중심, 품질과 기준에 관한 대화 중심",
+        "갈등해결": "원칙과 기준에 따라 객관적으로 해결",
+        "의사결정": "체계적 분석과 정해진 프로세스에 의해 결정",
+        "동기부여": "완성도 높은 결과물에 대한 인정과 칭찬",
+        "육아특징": "규칙과 질서를 중시하며 교육적 접근",
+        "집안일분담": "효율적이고 체계적인 방식으로 분담",
+        "가족소통": "계획적이고 규칙적인 대화 시간 마련",
+        "휴식여가": "스케줄에 따른 체계적인 여가 활동"
+      },
+      "지휘관형": {
+        "소통방식": "목표 중심, 지시와 피드백이 명확함",
+        "갈등해결": "신속하게 결정을 내리고 실행을 중시",
+        "의사결정": "신속하고 단호하게 결정, 책임을 지려 함",
+        "동기부여": "도전적 목표 제시와 성과에 대한 보상",
+        "육아특징": "명확한 규칙을 정하고 일관되게 적용",
+        "집안일분담": "각자의 역할을 명확히 정해 실행",
+        "가족소통": "필요한 사항을 효율적으로 전달",
+        "휴식여가": "목적이 분명한 활동 선호"
+      }
+    };
+
+    let currentQuestion = 0;
+    const scores = { 엄마형: 0, 코치형: 0, 장인형: 0, 지휘관형: 0 };
+    const quiz = document.getElementById("quiz");
+    const questionContainer = document.getElementById("questionContainer");
+    const resultBox = document.getElementById("resultBox");
+    const detailContainer = document.getElementById("detailContainer");
+    const comparisonContainer = document.getElementById("comparisonContainer");
+    const nextButton = document.getElementById("nextButton");
+    const progressDiv = document.getElementById("progress");
+
+    function showQuestion(index) {
+      const q = questions[index];
+      questionContainer.innerHTML = `
+        <strong>${q.text}</strong>
+        <div class="scale">
+          ${[1, 2, 3, 4, 5].map(n => `
+            <label>
+              <input type="radio" name="score" value="${n}">
+              ${n}
+            </label>
+          `).join('')}
+        </div>
+      `;
+      
+      progressDiv.textContent = `질문 ${index + 1} / ${questions.length}`;
+      
+      if (index === questions.length - 1) {
+        nextButton.textContent = "결과 보기";
+      } else {
+        nextButton.textContent = "다음 질문";
+      }
+    }
+
+    nextButton.addEventListener("click", function() {
+      const selectedRadio = document.querySelector('input[name="score"]:checked');
+      if (!selectedRadio) {
+        alert("답변을 선택해주세요.");
+        return;
+      }
+      
+      const value = parseInt(selectedRadio.value);
+      scores[questions[currentQuestion].type] += value;
+      currentQuestion++;
+
+      if (currentQuestion < questions.length) {
+        showQuestion(currentQuestion);
+      } else {
+        const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+        const best = sortedScores[0];
+        
+        resultBox.innerHTML = `
+          <h2>🎯 당신의 리더십 유형은 <strong>${best[0]}</strong>입니다.</h2>
+          <p>총점: ${best[1]}점</p>
+        `;
+        
+        quiz.style.display = 'none';
+        resultBox.classList.remove("hidden");
+        progressDiv.style.display = 'none';
+        
+        showDetails(best[0]);
+        showComparison(best[0]);
+      }
+    });
+
+    function showDetails(type) {
+      const detail = leadershipDetails[type];
+      detailContainer.innerHTML = `
+        <h3>${type} 리더십의 특징</h3>
+        <p>${detail.description}</p>
+        
+        <h4>👍 강점</h4>
+        <ul>
+          ${detail.strengths.map(s => `<li>${s}</li>`).join('')}
+        </ul>
+        
+        <h4>⚠️ 주의사항</h4>
+        <ul>
+          ${detail.weaknesses.map(w => `<li>${w}</li>`).join('')}
+        </ul>
+        
+        <h4>💡 개발 방향</h4>
+        <p>${detail.recommendation}</p>
+      `;
+      detailContainer.classList.remove("hidden");
+    }
+
+    function showComparison(myType) {
+      comparisonContainer.innerHTML = `
+        <h2>리더십 유형별 일과 삶의 특성 비교</h2>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>구분</th>
+              <th>엄마형</th>
+              <th>코치형</th>
+              <th>장인형</th>
+              <th>지휘관형</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${Object.keys(comparisonData["엄마형"]).map(key => `
+              <tr>
+                <td>${key}</td>
+                <td class="${myType === '엄마형' ? 'highlighted-row' : ''}">${comparisonData["엄마형"][key]}</td>
+                <td class="${myType === '코치형' ? 'highlighted-row' : ''}">${comparisonData["코치형"][key]}</td>
+                <td class="${myType === '장인형' ? 'highlighted-row' : ''}">${comparisonData["장인형"][key]}</td>
+                <td class="${myType === '지휘관형' ? 'highlighted-row' : ''}">${comparisonData["지휘관형"][key]}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      comparisonContainer.classList.remove("hidden");
+    }
+
+    // 첫 질문 표시
+    showQuestion(currentQuestion);
+  </script>
+</body>
+</html>
